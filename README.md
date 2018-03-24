@@ -3,7 +3,8 @@ Singer.io tap for getting Facebook posts from the Facebook Graph API.
 
 
 This tap:
-- Pulls posts data for a given node from the [Facebook Graph API][https://developers.facebook.com/docs/graph-api]. If no state is specified, it will pull all available data for the feed.
+- Pulls posts data for a given node from the [Facebook Graph API][https://developers.facebook.com/docs/graph-api]. If no state is specified, it will pull all available data for the feed, up to a limit of 50 API calls.
+- Prints the 'after' cursor (the next post that one should request from the API) to STATE
  
 
 # Quick Start

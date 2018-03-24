@@ -16,12 +16,6 @@ def load_schema(entity):
     return singer.utils.load_json(get_abs_path("schemas/{}.json".format(entity)))
 
 
-#def read_configs():
-#    with open('../config.json') as config_file:
-#        data = json.load(config_file)
-#    return data['access_token']
-
-
 def format_datetime_string(original_dt):
     """Convert datetime into formatted string that is compatible with the Singer spec.
     """
@@ -58,17 +52,20 @@ def write_records(data):
         singer.write_record('facebook_posts', record)
 
 def fetch_posts(node_id, access_token):
+    MAX_REQUEST_ITERATIONS = 50
     schema = load_schema("facebook_posts")
     singer.write_schema("facebook_posts", schema, key_properties=["id"])
 
     node_feed = fetch_node_feed(node_id, access_token)
     write_records(node_feed['data'])
     try:
-        while node_feed['paging']['cursors']['after']:
+        while node_feed['paging']['cursors']['after'] and MAX_REQUEST_ITERATIONS:
             after_state_marker = node_feed['paging']['cursors']['after']
+            singer.write_state({'after': after_state_marker})
             node_feed = fetch_node_feed(node_id, access_token, 
                                         after_state_marker=after_state_marker)
             write_records(node_feed['data'])
+            MAX_REQUEST_ITERATIONS -= 1
     except KeyError:
         pass
 

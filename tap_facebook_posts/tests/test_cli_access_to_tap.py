@@ -1,7 +1,8 @@
+"""
 from unittest import TestCase
 import argparse
 
-from ..__main__ import create_parser
+from .. import create_parser
 
 
 class TestTapValid(TestCase):
@@ -12,3 +13,4 @@ class TestTapValid(TestCase):
 	def test_can_call_tap_through_command_line(self):
 		parsed = self.parser.parse_args(['--config', 'config.json'])
 		self.assertTrue(parsed)
+"""
