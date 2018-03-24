@@ -4,7 +4,7 @@ import json
 
 import singer
 
-from fetch_facebook_posts_data import fetch_posts
+from .fetch_facebook_posts_data import fetch_posts
 
 
 logger = singer.get_logger()

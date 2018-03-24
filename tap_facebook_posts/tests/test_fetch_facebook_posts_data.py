@@ -96,7 +96,7 @@ class TestFetchFacebookPostsData(TestCase):
                            content=json.dumps(FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
         
             with redirect_stdout(out):
-                fetch_posts('AAA')
+                fetch_posts('officialstackoverflow', 'AAA')
 
         out_dicts = sysoutput_to_dicts(out)
         row_types = [x['type'] for x in out_dicts]
@@ -115,7 +115,7 @@ class TestFetchFacebookPostsData(TestCase):
                            content=json.dumps(FACEBOOK_POSTS_MULT_RECORD_DATA).encode('utf-8'))
         
             with redirect_stdout(out):
-                fetch_posts('AAA')
+                fetch_posts('officialstackoverflow', 'AAA')
 
         out_dicts = sysoutput_to_dicts(out)
         row_types = [x['type'] for x in out_dicts]
@@ -138,7 +138,7 @@ class TestFetchFacebookPostsData(TestCase):
                            content=json.dumps(FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
         
             with redirect_stdout(out):
-                fetch_posts('AAA')
+                fetch_posts('officialstackoverflow', 'AAA')
 
         out_dicts = sysoutput_to_dicts(out)
         row_types = [x['type'] for x in out_dicts]
@@ -157,4 +157,7 @@ class TestFetchFacebookPostsData(TestCase):
         self.assertEqual(formatted_datetime, '2018-03-19T18:17:00Z')
 
 
-        
+class TestStateAndPagination(TestCase):
+
+    def test_can_start_pulling_data_at_a_certain_page(self):
+        fetch_posts('officialstackoverflow')

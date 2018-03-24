@@ -1,7 +1,7 @@
 from unittest import TestCase
 import argparse
 
-from .. import create_parser
+from ..__main__ import create_parser
 
 
 class TestTapValid(TestCase):

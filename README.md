@@ -1,5 +1,9 @@
 # tap-facebook-posts
 Singer.io tap for getting Facebook posts from the Facebook Graph API.
+
+
+This tap:
+- Pulls posts data for a given node from the [Facebook Graph API][https://developers.facebook.com/docs/graph-api]. If no state is specified, it will pull all available data for the feed.
  
 
 # Quick Start
@@ -27,7 +31,7 @@ tap-facebook-posts -c config.json
 
 
 # Development
-## Runnin un-packaged tap
+## Running un-packaged tap
 ```
 cd tap_facebook_posts
 python . -c ../config.json

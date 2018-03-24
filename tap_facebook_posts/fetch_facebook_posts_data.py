@@ -31,7 +31,7 @@ def format_datetime_string(original_dt):
     return dt.strftime(TARGET_DATETIME_PARSE)
 
 
-def fetch_node_feed(node_id, access_token=read_configs()):
+def fetch_node_feed(node_id, access_token=read_configs(), after_state_marker=None):
     """Fetch the feed with all Post nodes for a given node.
 
     For more info, see https://developers.facebook.com/docs/graph-api/using-graph-api/
@@ -39,23 +39,39 @@ def fetch_node_feed(node_id, access_token=read_configs()):
     node_id: int, unique identifier for a given node.
     """
     BASE_FACEBOOK_GRAPH_API_URL = 'https://graph.facebook.com/v2.11/'
-
-    url = BASE_FACEBOOK_GRAPH_API_URL + str(node_id) + '/feed?access_token=' + access_token
+    base_url = BASE_FACEBOOK_GRAPH_API_URL + str(node_id) + '/feed?limit=100&access_token=' + access_token 
+    if not after_state_marker:
+        url = base_url
+    else:
+        url = base_url + '&after=' + after_state_marker
     response = requests.get(url)
-    # Raise if not 200 OK
-    response.raise_for_status()
-    return(json.loads(response.content))
+    if response.status_code == 200:
+        return(json.loads(response.content))
+    else:
+        error_message = str(response.status_code) + ' Client Error: ' + response.content.decode('utf-8')
+        raise requests.exceptions.HTTPError(error_message)
 
 
-def fetch_posts(access_token=read_configs()):
+def write_records(data):
+    for record in data:
+        record['created_time'] = format_datetime_string(record['created_time'])
+        singer.write_record('facebook_posts', record)
+
+def fetch_posts(node_id, access_token=read_configs()):
     schema = load_schema("facebook_posts")
     singer.write_schema("facebook_posts", schema, key_properties=["id"])
 
-    node_feed = fetch_node_feed('officialstackoverflow', access_token)
-    
-    for record in node_feed['data']:
-        record['created_time'] = format_datetime_string(record['created_time'])
-        singer.write_record('facebook_posts', record)
+    node_feed = fetch_node_feed(node_id, access_token)
+    write_records(node_feed['data'])
+    try:
+        while node_feed['paging']['cursors']['after']:
+            after_state_marker = node_feed['paging']['cursors']['after']
+            node_feed = fetch_node_feed(node_id, access_token, 
+                                        after_state_marker=after_state_marker)
+            write_records(node_feed['data'])
+    except KeyError:
+        pass
+
 
 if __name__ == '__main__':
     fetch_posts()
