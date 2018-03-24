@@ -4,6 +4,7 @@ setup(name="tap-facebook-posts",
       version="0.0.1",
       description="Singer.io tap for extracting posts data from the Facebook Graph API",
       author="rowanv",
+      license='Apache 2.0',
       url="https://github.com/rowanv",
       classifiers=["Programming Language :: Python :: 3 :: Only"],
       py_modules=["tap_facebook_posts"],
@@ -13,11 +14,12 @@ setup(name="tap-facebook-posts",
         'requests',
         'singer-python==5.0.12',
       ],
+      python_requires='>=3',
       entry_points="""
           [console_scripts]
           tap-facebook-posts=tap_facebook_posts:main
       """,
-      packages=["tap_xero"],
+      packages=["tap_facebook_posts"],
       package_data = {
           "schemas": ["tap_facebook_posts/schemas/*.json"]
       },
