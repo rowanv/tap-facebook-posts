@@ -27,5 +27,11 @@ tap-facebook-posts -c config.json
 
 
 # Development
+## Runnin un-packaged tap
+```
+cd tap_facebook_posts
+python . -c ../config.json
+```
+
 ## Running tests
 Install the requirements in `requirements-dev.txt`. Then, run the tests with `nosetests`.
