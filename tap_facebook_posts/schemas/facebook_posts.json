@@ -1,12 +1,14 @@
 {
-	"created_time": {
-        "type": "string",
-        "format": "date-time"
-    },
-    "message": {
-    	"type": "string"
-    },
-    "id": {
-    	"type": "string"
-    }
+	"properties": {
+		"created_time": {
+	        "type": "string",
+	        "format": "date-time"
+	    },
+	    "message": {
+	    	"type": "string"
+	    },
+	    "id": {
+	    	"type": "string"
+	    }
+	}
 }
