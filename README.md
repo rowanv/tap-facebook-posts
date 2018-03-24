@@ -36,6 +36,22 @@ tap-facebook-posts -c config.json
 cd tap_facebook_posts
 python . -c ../config.json
 ```
+```
+python -m tap_facebook_posts -c ../config.json
+```
 
 ## Running tests
 Install the requirements in `requirements-dev.txt`. Then, run the tests with `nosetests`.
+
+# Deploy
+TestPyPI
+```
+python setup.py sdist
+twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+pip install --index-url https://test.pypi.org/simple/ tap-facebook-posts==0.0.2a1
+```
+
+ProdPyPI
+```
+twine upload dist/*
+```

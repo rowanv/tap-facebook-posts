@@ -16,10 +16,10 @@ def load_schema(entity):
     return singer.utils.load_json(get_abs_path("schemas/{}.json".format(entity)))
 
 
-def read_configs():
-    with open('../config.json') as config_file:
-        data = json.load(config_file)
-    return data['access_token']
+#def read_configs():
+#    with open('../config.json') as config_file:
+#        data = json.load(config_file)
+#    return data['access_token']
 
 
 def format_datetime_string(original_dt):
@@ -31,7 +31,7 @@ def format_datetime_string(original_dt):
     return dt.strftime(TARGET_DATETIME_PARSE)
 
 
-def fetch_node_feed(node_id, access_token=read_configs(), after_state_marker=None):
+def fetch_node_feed(node_id, access_token, after_state_marker=None):
     """Fetch the feed with all Post nodes for a given node.
 
     For more info, see https://developers.facebook.com/docs/graph-api/using-graph-api/
@@ -57,7 +57,7 @@ def write_records(data):
         record['created_time'] = format_datetime_string(record['created_time'])
         singer.write_record('facebook_posts', record)
 
-def fetch_posts(node_id, access_token=read_configs()):
+def fetch_posts(node_id, access_token):
     schema = load_schema("facebook_posts")
     singer.write_schema("facebook_posts", schema, key_properties=["id"])
 

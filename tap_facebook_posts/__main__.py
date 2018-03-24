@@ -27,12 +27,14 @@ def main():
     with open(args.config) as config_file:
         config = json.load(config_file)
 
-    if 'access_token' not in config:
-        logger.fatal("Missing required configuration keys: {}".format('access_token'))
-        exit(1)
+    required_config_vars = ['access_token', 'node_id', ]
+    for r in required_config_vars:
+        if r not in config:
+            logger.fatal("Missing required configuration keys: {}".format(r))
+            exit(1)
 
     try:
-        fetch_posts(access_token=config['access_token'])
+        fetch_posts(config['node_id'], access_token=config['access_token'])
     except Exception as exception:
         logger.critical(exception)
         raise exception
