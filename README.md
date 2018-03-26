@@ -65,6 +65,7 @@ python -m tap_facebook_posts -c ../config.json
 
 ## Running tests
 Install the requirements in `requirements-dev.txt`. Then, run the tests with `nosetests`.
+You can check the tap with singer-tools using `singer-check-tap --tap tap-facebook-posts -c config.json`
 
 ## Linting
 ```

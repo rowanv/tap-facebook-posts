@@ -1,9 +1,9 @@
 from unittest import TestCase
 import io
-from contextlib import redirect_stdout
-import requests
 import json
+from contextlib import redirect_stdout
 
+import requests
 import requests_mock
 
 from ..fetch_facebook_posts_data import (fetch_node_feed, fetch_posts,
@@ -34,11 +34,12 @@ FACEBOOK_POSTS_MULT_RECORD_DATA = {
     'data': [{
         'created_time': '2018-03-19T18:17:00+0000',
         'message': 'This is a test message',
-        'id': '11239244970_10150962953494971'},
-        {
+        'id': '11239244970_10150962953494971'
+    }, {
         'created_time': '2018-03-19T18:17:00+0000',
         'message': 'This is a anothertest message',
-        'id': '11239244970_10150962953494111'}],
+        'id': '11239244970_10150962953494111'
+    }],
     'paging': {
         'cursors': {'before': 'before_cursor_AAA', 'after': 'after_cursor_ZZZ'},
         'next': 'https://graph.facebook.com/v2.11/11239244970/feed?access_token=AAA'}
@@ -71,7 +72,7 @@ def equal_dicts(d1, d2, ignore_keys=None):
     for k1, v1 in d1.items():
         if k1 not in ignored and (k1 not in d2 or d2[k1] != v1):
             return False
-    for k2, v2 in d2.items():
+    for k2, _ in d2.items():
         if k2 not in ignored and k2 not in d1:
             return False
     return True
@@ -104,7 +105,7 @@ class TestFetchFacebookPostsData(TestCase):
             request_url = BASE_FB_URL + 'account_id/feed?access_token=AAA'
             m.register_uri(
                 'GET', request_url, status_code=200, content=json.dumps(
-                FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
+                    FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
             response = fetch_node_feed('account_id', access_token='AAA')
 
             self.assertEqual(FACEBOOK_POSTS_ONE_RECORD_DATA, response)
@@ -116,7 +117,7 @@ class TestFetchFacebookPostsData(TestCase):
                 request_url = BASE_FB_URL + 'account_id/feed?access_token=AAA'
                 m.register_uri(
                     'GET', request_url, status_code=200, content=json.dumps(
-                    FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
+                        FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
                 fetch_posts(node_id='account_id', access_token='AAA')
 
         out_dicts = sysoutput_to_dicts(out)
@@ -149,7 +150,7 @@ class TestFetchFacebookPostsData(TestCase):
             request_url = ('https://graph.facebook.com/v2.11/'
                            'officialstackoverflow/feed?access_token=AAA')
             m.register_uri('GET', request_url, status_code=200, content=json.dumps(
-                FACEBOOK_POSTS_MULT_RECORD_DATA).encode('utf-8'))
+                           FACEBOOK_POSTS_MULT_RECORD_DATA).encode('utf-8'))
 
             with redirect_stdout(out):
                 fetch_posts('officialstackoverflow', 'AAA')
@@ -169,7 +170,7 @@ class TestFetchFacebookPostsData(TestCase):
     def test_records_have_singer_format_string_times(self):
         out = io.StringIO()
         with requests_mock.Mocker() as m:
-            request_url = (BASE_FB_URL + 
+            request_url = (BASE_FB_URL +
                            'officialstackoverflow/feed?access_token=AAA')
             m.register_uri('GET', request_url, status_code=200, content=json.dumps(
                 FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
@@ -196,7 +197,7 @@ class TestFetchFacebookPostsData(TestCase):
     def test_invalid_config_access_token(self):
         out = io.StringIO()
         with requests_mock.Mocker() as m:
-            request_url = (BASE_FB_URL + 
+            request_url = (BASE_FB_URL +
                            'officialstackoverflow/feed?access_token=AAA')
             m.register_uri(
                 'GET',
@@ -236,16 +237,16 @@ class TestStateAndPagination(TestCase):
             self.assertEqual(
                 FACEBOOK_POSTS_ONE_RECORD_DATA['paging']['cursors']['after'],
                 'after_cursor_ZZZ')
-            first_request_url = (BASE_FB_URL + 
-                'account_id/feed?limit=100&access_token=AAA'
-                '&after=after_cursor_YYY')
+            first_request_url = (BASE_FB_URL +
+                                 'account_id/feed?limit=100&access_token=AAA'
+                                 '&after=after_cursor_YYY')
             m.register_uri(
                 'GET', first_request_url, status_code=200, content=json.dumps(
                     FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
 
-            second_request_url = (BASE_FB_URL + 
-                'account_id/feed?limit=100&access_token=AAA'
-                '&after=after_cursor_ZZZ')
+            second_request_url = (BASE_FB_URL +
+                                  'account_id/feed?limit=100&access_token=AAA'
+                                  '&after=after_cursor_ZZZ')
             # Our second_request_uri does not have an after cursor marker
             m.register_uri(
                 'GET', second_request_url, status_code=200, content=json.dumps(

@@ -38,8 +38,8 @@ def main():
             after_state_marker = state['after']
 
     try:
-        fetch_posts(config['node_id'], access_token=config['access_token'], 
-            after_state_marker=after_state_marker)
+        fetch_posts(config['node_id'], access_token=config['access_token'],
+                    after_state_marker=after_state_marker)
     except Exception as exception:
         logger.critical(exception)
         raise exception
