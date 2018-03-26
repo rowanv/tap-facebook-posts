@@ -36,9 +36,8 @@ def main():
         with open(args.state) as state_file:
             state = json.load(state_file)
             after_state_marker = state['after']
-    
-    try:
 
+    try:
         fetch_posts(config['node_id'], access_token=config['access_token'], 
             after_state_marker=after_state_marker)
     except Exception as exception:

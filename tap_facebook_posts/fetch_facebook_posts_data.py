@@ -1,9 +1,7 @@
 import os
 import json
 import requests
-import dateutil
 import datetime
-from datetime import timezone
 
 import singer
 
