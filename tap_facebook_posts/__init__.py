@@ -25,15 +25,22 @@ def main():
 
     with open(args.config) as config_file:
         config = json.load(config_file)
-
     required_config_vars = ['access_token', 'node_id', ]
     for r in required_config_vars:
         if r not in config:
             logger.fatal("Missing required configuration keys: {}".format(r))
             exit(1)
 
+    after_state_marker = None
+    if args.state:
+        with open(args.state) as state_file:
+            state = json.load(state_file)
+            after_state_marker = state['after']
+    
     try:
-        fetch_posts(config['node_id'], access_token=config['access_token'])
+
+        fetch_posts(config['node_id'], access_token=config['access_token'], 
+            after_state_marker=after_state_marker)
     except Exception as exception:
         logger.critical(exception)
         raise exception

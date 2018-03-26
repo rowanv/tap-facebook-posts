@@ -25,7 +25,7 @@ def format_datetime_string(original_dt):
     return dt.strftime(TARGET_DATETIME_PARSE)
 
 
-def fetch_node_feed(node_id, access_token, after_state_marker=None):
+def fetch_node_feed(node_id, access_token, *, after_state_marker=None):
     """Fetch the feed with all Post nodes for a given node.
 
     For more info, see https://developers.facebook.com/docs/graph-api/using-graph-api/
@@ -51,21 +51,26 @@ def write_records(data):
         record['created_time'] = format_datetime_string(record['created_time'])
         singer.write_record('facebook_posts', record)
 
-def fetch_posts(node_id, access_token):
+def fetch_posts(node_id, access_token, after_state_marker=None):
+    current_state_marker = after_state_marker
     MAX_REQUEST_ITERATIONS = 50
     schema = load_schema("facebook_posts")
     singer.write_schema("facebook_posts", schema, key_properties=["id"])
 
-    node_feed = fetch_node_feed(node_id, access_token)
+    node_feed = fetch_node_feed(node_id, access_token, after_state_marker=after_state_marker)
     write_records(node_feed['data'])
     try:
         while node_feed['paging']['cursors']['after'] and MAX_REQUEST_ITERATIONS:
-            after_state_marker = node_feed['paging']['cursors']['after']
-            singer.write_state({'after': after_state_marker})
-            node_feed = fetch_node_feed(node_id, access_token, 
-                                        after_state_marker=after_state_marker)
-            write_records(node_feed['data'])
-            MAX_REQUEST_ITERATIONS -= 1
+            response_after_state_marker = node_feed['paging']['cursors']['after']
+            # Did we already fetch the reponse marked by this state marker?
+            if current_state_marker != response_after_state_marker:
+                singer.write_state({'after': response_after_state_marker})
+                node_feed = fetch_node_feed(node_id, access_token, 
+                                        after_state_marker=response_after_state_marker)
+                write_records(node_feed['data'])
+                MAX_REQUEST_ITERATIONS -= 1
+            else:
+                break
     except KeyError:
         pass
 

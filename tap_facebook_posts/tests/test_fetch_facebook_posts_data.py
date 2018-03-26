@@ -20,6 +20,15 @@ FACEBOOK_POSTS_ONE_RECORD_DATA = {
         'next': 'https://graph.facebook.com/v2.11/11239244970/feed?access_token=AAA'}
 }
 
+FACEBOOK_LAST_PAGE_RECORD_DATA = {
+    'data': [{
+        'created_time': '2018-03-19T18:17:00+0000', 
+        'message': 'This is a the last page record message', 
+        'id': '11239244970_10150962953494971'},],
+    'paging': {
+        'cursors': {'before': 'before_cursor_BBB'}, }
+}
+
 
 FACEBOOK_POSTS_MULT_RECORD_DATA = {
     'data': [{
@@ -190,7 +199,7 @@ class TestFetchFacebookPostsData(TestCase):
 
 
 class TestStateAndPagination(TestCase):
-
+    
     def test_can_write_state(self):
         out = io.StringIO()
         with redirect_stdout(out):
@@ -204,8 +213,36 @@ class TestStateAndPagination(TestCase):
         row_types = [x['type'] for x in out_dicts]
         # We have a state record type
         self.assertIn('STATE', row_types)
-
-    def test_can_start_pulling_data_at_a_certain_page(self):
-        access_token = read_access_token()
-        fetch_posts('officialstackoverflow', access_token=access_token)
     
+    def test_can_start_pulling_data_at_a_certain_page(self):
+        out = io.StringIO()        
+        with requests_mock.Mocker() as m:
+            # Our first request URL points at second_request_uri
+            self.assertEqual(
+                FACEBOOK_POSTS_ONE_RECORD_DATA['paging']['cursors']['after'], 
+                'after_cursor_ZZZ')
+            first_request_url = 'https://graph.facebook.com/v2.11/account_id/feed?limit=100&access_token=AAA&after=after_cursor_YYY'
+            m.register_uri('GET', first_request_url, status_code=200, 
+                           content=json.dumps(FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
+            
+            second_request_url = 'https://graph.facebook.com/v2.11/account_id/feed?limit=100&access_token=AAA&after=after_cursor_ZZZ'
+            # Our second_request_uri does not have an after cursor marker
+            m.register_uri('GET', second_request_url, status_code=200, 
+                           content=json.dumps(FACEBOOK_LAST_PAGE_RECORD_DATA).encode('utf-8'))
+            with self.assertRaises(KeyError):
+                FACEBOOK_LAST_PAGE_RECORD_DATA['paging']['cursors']['after']
+
+            with redirect_stdout(out):
+                fetch_posts(node_id='account_id', access_token='AAA', 
+                            after_state_marker='after_cursor_YYY')
+
+            out_dicts = sysoutput_to_dicts(out)
+            # It recorded the state as expected
+            row_messages = [x['record']['message'] for x in out_dicts if x['type'] == 'RECORD']
+            state_record = [x for x in out_dicts if x['type'] == 'STATE'][0]
+            # It fetched both of our messages
+            self.assertIn(FACEBOOK_LAST_PAGE_RECORD_DATA['data'][0]['message'], row_messages)
+            self.assertIn(FACEBOOK_POSTS_ONE_RECORD_DATA['data'][0]['message'], row_messages)
+            # And recorded the state of the first call
+            self.assertEqual(state_record['value']['after'], 
+                FACEBOOK_POSTS_ONE_RECORD_DATA['paging']['cursors']['after'])
