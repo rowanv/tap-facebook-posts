@@ -194,6 +194,7 @@ class TestFetchFacebookPostsData(TestCase):
         self.assertEqual(formatted_datetime, '2018-03-19T18:17:00Z')
 
     def test_invalid_config_access_token(self):
+        out = io.StringIO()
         with requests_mock.Mocker() as m:
             request_url = (BASE_FB_URL + 
                            'officialstackoverflow/feed?access_token=AAA')
@@ -203,8 +204,9 @@ class TestFetchFacebookPostsData(TestCase):
                 status_code=200,
                 content=json.dumps(AUTH_TOKEN_INVALID_DATA).encode('utf-8'))
 
-        with self.assertRaises(requests.exceptions.HTTPError) as error_manager:
-            fetch_posts('officialstackoverflow', 'AAA')
+        with redirect_stdout(out):
+            with self.assertRaises(requests.exceptions.HTTPError) as error_manager:
+                fetch_posts('officialstackoverflow', 'AAA')
 
         error_message = error_manager.exception.args[0]
         self.assertIn('400 Client Error', error_message)
