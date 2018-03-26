@@ -30,6 +30,7 @@ Create a JSON file called `config.json`. Its contents should look like:
 
 ```
   {
+  	"node_id": "<NODE_ID>",
   	"access_token": "<YOUR_FACEBOOK_GRAPH_API_ACCESS_TOKEN>"
   }
 ```
