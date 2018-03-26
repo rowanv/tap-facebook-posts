@@ -28,7 +28,9 @@ def fetch_node_feed(node_id, access_token, *, after_state_marker=None):
 
     For more info, see https://developers.facebook.com/docs/graph-api/using-graph-api/
 
-    node_id: int, unique identifier for a given node.
+    node_id: str or int, unique identifier for a given node.
+    access_token: str, access token to Facebook Graph API
+    after_state_marker: If provided, will only fetch posts after that marker.
     """
     BASE_FACEBOOK_GRAPH_API_URL = 'https://graph.facebook.com/v2.11/'
     base_url = BASE_FACEBOOK_GRAPH_API_URL + str(node_id) + '/feed?limit=100&access_token=' + access_token 
@@ -50,6 +52,12 @@ def write_records(data):
         singer.write_record('facebook_posts', record)
 
 def fetch_posts(node_id, access_token, after_state_marker=None):
+    """Fetches all posts for a given node.
+
+    node_id:  str or int, unique identifier for a given node.
+    access_token: str, access token to Facebook Graph API
+    after_state_marker: If provided, will only fetch posts after that marker.
+    """
     current_state_marker = after_state_marker
     MAX_REQUEST_ITERATIONS = 50
     schema = load_schema("facebook_posts")
