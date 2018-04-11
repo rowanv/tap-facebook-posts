@@ -13,7 +13,9 @@ available data for the feed, up to a limit of 50 API calls.
 - Prints the 'after' cursor (the next post that one should request from the API) to STATE
 - Can fetch all posts after an 'after' cursor if provided with a `-s` flag 
 
-# Quick Start
+## Connecting tap-facebook-posts
+
+### Quick Start
 
 1. Install 
 
@@ -54,8 +56,8 @@ tap-facebook-posts -c config.json -s state.json
 ```
 If you omit state settings, it will fetch all available posts for the given `node_id`.
 
-# Development
-## Running un-packaged tap
+## Development
+### Running un-packaged tap
 ```
 cd tap_facebook_posts
 python . -c ../config.json
@@ -64,16 +66,16 @@ python . -c ../config.json
 python -m tap_facebook_posts -c ../config.json
 ```
 
-## Running tests
+### Running tests
 Install the requirements in `requirements-dev.txt`. Then, run the tests with `nosetests`.
 You can check the tap with singer-tools using `singer-check-tap --tap tap-facebook-posts -c config.json`
 
-## Linting
+### Linting
 ```
 bash dev_tools/linter.sh
 ```
 
-# Deploy
+## Deploy
 TestPyPI
 ```
 python setup.py sdist
