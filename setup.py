@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name="tap-facebook-posts",
-      version="0.0.3.dev1",
+      version="0.0.4",
       description="Singer.io tap for extracting posts data from the Facebook Graph API",
       author="rowanv",
       license='Apache 2.0',
