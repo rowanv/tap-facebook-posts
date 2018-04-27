@@ -44,7 +44,7 @@ def fetch_node_feed(node_id, access_token, *, after_state_marker=None):
         url = base_url + '&after=' + after_state_marker
     response = requests.get(url)
     if response.status_code == 200:
-        return json.loads(response.content)
+        return json.loads(response.content.decode('utf-8'))
     else:
         error_message = str(response.status_code) + ' Client Error: ' + response.content.decode('utf-8')
         raise requests.exceptions.HTTPError(error_message)
