@@ -7,17 +7,19 @@ Singer.io tap for getting Facebook posts from the Facebook Graph API.
 
 
 This tap:
-- Pulls posts data for a given node from the [Facebook Graph API][https://developers.facebook.com/docs/graph-api]. If no state is specified, it will pull all 
+- Pulls posts data for a given node from the [Facebook Graph API]. If no state is specified, it will pull all
 available data for the feed, up to a limit of 50 API calls.
 - Outputs the schema for the posts resource
 - Prints the 'after' cursor (the next post that one should request from the API) to STATE
-- Can fetch all posts after an 'after' cursor if provided with a `-s` flag 
+- Can fetch all posts after an 'after' cursor if provided with a `-s` flag
+
+[Facebook Graph API]: https://developers.facebook.com/docs/graph-api
 
 ## Connecting tap-facebook-posts
 
 ### Quick Start
 
-1. Install 
+1. Install
 
 We recommend using a virtualenv
 ```
@@ -36,7 +38,7 @@ Create a JSON file called `config.json`. Its contents should look like:
   	"access_token": "<YOUR_FACEBOOK_GRAPH_API_ACCESS_TOKEN>"
   }
 ```
-You can quickly get a Graph API Explorer access token via the [Graph API Explorer][https://developers.facebook.com/tools/explorer?method=GET&path=me%3Ffields%3Did%2Cname&version=v2.12]
+You can quickly get a Graph API Explorer access token via the [Graph API Explorer](https://developers.facebook.com/tools/explorer?method=GET&path=me%3Ffields%3Did%2Cname&version=v2.12)
 
 3. Run the tap
 ```
