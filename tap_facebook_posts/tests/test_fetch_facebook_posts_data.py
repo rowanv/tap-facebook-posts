@@ -7,43 +7,15 @@ import requests
 import requests_mock
 
 from ..fetch_facebook_posts_data import (fetch_node_feed, fetch_posts,
-                                         format_datetime_string)
-
-
-FACEBOOK_POSTS_ONE_RECORD_DATA = {
-    'data': [{
-        'created_time': '2018-03-19T18:17:00+0000',
-        'message': 'This is a test message',
-        'id': '11239244970_10150962953494971'}, ],
-    'paging': {
-        'cursors': {'before': 'before_cursor_AAA', 'after': 'after_cursor_ZZZ'},
-        'next': 'https://graph.facebook.com/v2.11/11239244970/feed?access_token=AAA'}
-}
-
-FACEBOOK_LAST_PAGE_RECORD_DATA = {
-    'data': [{
-        'created_time': '2018-03-19T18:17:00+0000',
-        'message': 'This is a the last page record message',
-        'id': '11239244970_10150962953494971'}, ],
-    'paging': {
-        'cursors': {'before': 'before_cursor_BBB'}, }
-}
-
-
-FACEBOOK_POSTS_MULT_RECORD_DATA = {
-    'data': [{
-        'created_time': '2018-03-19T18:17:00+0000',
-        'message': 'This is a test message',
-        'id': '11239244970_10150962953494971'
-    }, {
-        'created_time': '2018-03-19T18:17:00+0000',
-        'message': 'This is a anothertest message',
-        'id': '11239244970_10150962953494111'
-    }],
-    'paging': {
-        'cursors': {'before': 'before_cursor_AAA', 'after': 'after_cursor_ZZZ'},
-        'next': 'https://graph.facebook.com/v2.11/11239244970/feed?access_token=AAA'}
-}
+                                         format_datetime_string,
+                                         clean_reactions_data)
+from .constants import (
+    BASE_FB_URL, REACTIONS_URL,FACEBOOK_POSTS_ONE_RECORD_RAW_DATA,
+    FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA,
+    SAMPLE_COUNT, FACEBOOK_LAST_PAGE_RECORD_RAW_DATA,
+    FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA,
+    FACEBOOK_POSTS_MULT_RECORD_RAW_DATA,
+    FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA)
 
 
 AUTH_TOKEN_INVALID_DATA = {
@@ -54,23 +26,6 @@ AUTH_TOKEN_INVALID_DATA = {
         "fbtrace_id": "ADSG8pUqsRg"
     }
 }
-
-
-BASE_FB_URL = 'https://graph.facebook.com/v2.11/'
-REACTIONS_URL = (
-        '/posts?fields=created_time,story,message,shares,'
-        'reactions.limit(0).summary(1).as(total_reaction_count),'
-        'reactions.type(NONE).limit(0).summary(1).as(none_count),'
-        'reactions.type(LIKE).limit(0).summary(1).as(like_count),'
-        'reactions.type(LOVE).limit(0).summary(1).as(love_count),'
-        'reactions.type(HAHA).limit(0).summary(1).as(haha_count),'
-        'reactions.type(WOW).limit(0).summary(1).as(wow_count),'
-        'reactions.type(SAD).limit(0).summary(1).as(sad_count),'
-        'reactions.type(ANGRY).limit(0).summary(1).as(angry_count),'
-        'reactions.type(THANKFUL).limit(0).summary(1).as(thankful_count),'
-        'reactions.type(PRIDE).limit(0).summary(1).as(pride_count)'
-        '&limit=100&access_token='
-    )
 
 
 def read_access_token():
@@ -119,10 +74,10 @@ class TestFetchFacebookPostsData(TestCase):
             request_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
             m.register_uri(
                 'GET', request_url, status_code=200, content=json.dumps(
-                    FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
+                    FACEBOOK_POSTS_ONE_RECORD_RAW_DATA).encode('utf-8'))
             response = fetch_node_feed('account_id', access_token='AAA')
 
-            self.assertEqual(FACEBOOK_POSTS_ONE_RECORD_DATA, response)
+            self.assertEqual(FACEBOOK_POSTS_ONE_RECORD_RAW_DATA, response)
 
     def test_can_write_schema(self):
         out = io.StringIO()
@@ -131,7 +86,7 @@ class TestFetchFacebookPostsData(TestCase):
                 request_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
                 m.register_uri(
                     'GET', request_url, status_code=200, content=json.dumps(
-                        FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
+                        FACEBOOK_POSTS_ONE_RECORD_RAW_DATA).encode('utf-8'))
                 fetch_posts(node_id='account_id', access_token='AAA')
 
         out_dicts = sysoutput_to_dicts(out)
@@ -144,7 +99,7 @@ class TestFetchFacebookPostsData(TestCase):
         with requests_mock.Mocker() as m:
             request_url = BASE_FB_URL + 'officialstackoverflow' + REACTIONS_URL + 'AAA'
             m.register_uri('GET', request_url, status_code=200, content=json.dumps(
-                FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
+                FACEBOOK_POSTS_ONE_RECORD_RAW_DATA).encode('utf-8'))
 
             with redirect_stdout(out):
                 fetch_posts('officialstackoverflow', 'AAA')
@@ -155,7 +110,7 @@ class TestFetchFacebookPostsData(TestCase):
         self.assertIn('RECORD', row_types)
         # And it contains our expected data
         self.assertTrue(equal_dicts(out_dicts[1]['record'],
-                                    FACEBOOK_POSTS_ONE_RECORD_DATA['data'][0],
+                                    FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0],
                                     ignore_keys='created_time'))
 
     def test_can_write_multiple_records(self):
@@ -163,7 +118,7 @@ class TestFetchFacebookPostsData(TestCase):
         with requests_mock.Mocker() as m:
             request_url = BASE_FB_URL + 'officialstackoverflow' + REACTIONS_URL + 'AAA'
             m.register_uri('GET', request_url, status_code=200, content=json.dumps(
-                           FACEBOOK_POSTS_MULT_RECORD_DATA).encode('utf-8'))
+                           FACEBOOK_POSTS_MULT_RECORD_RAW_DATA).encode('utf-8'))
 
             with redirect_stdout(out):
                 fetch_posts('officialstackoverflow', 'AAA')
@@ -174,10 +129,10 @@ class TestFetchFacebookPostsData(TestCase):
         self.assertIn('RECORD', row_types)
         # And it contains both of our expected data points
         self.assertTrue(equal_dicts(out_dicts[1]['record'],
-                                    FACEBOOK_POSTS_MULT_RECORD_DATA['data'][0],
+                                    FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0],
                                     ignore_keys='created_time'))
         self.assertTrue(equal_dicts(out_dicts[2]['record'],
-                                    FACEBOOK_POSTS_MULT_RECORD_DATA['data'][1],
+                                    FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1],
                                     ignore_keys='created_time'))
 
     def test_records_have_singer_format_string_times(self):
@@ -185,7 +140,7 @@ class TestFetchFacebookPostsData(TestCase):
         with requests_mock.Mocker() as m:
             request_url = BASE_FB_URL + 'officialstackoverflow' + REACTIONS_URL + 'AAA'
             m.register_uri('GET', request_url, status_code=200, content=json.dumps(
-                FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
+                FACEBOOK_POSTS_ONE_RECORD_RAW_DATA).encode('utf-8'))
 
             with redirect_stdout(out):
                 fetch_posts('officialstackoverflow', 'AAA')
@@ -195,7 +150,7 @@ class TestFetchFacebookPostsData(TestCase):
         # It has been converted
         self.assertNotEqual(
             out_dicts[1]['record']['created_time'],
-            FACEBOOK_POSTS_ONE_RECORD_DATA['data'][0]['created_time'])
+            FACEBOOK_POSTS_ONE_RECORD_RAW_DATA['data'][0]['created_time'])
         # to the format that Singer expects
         self.assertEqual(out_dicts[1]['record']['created_time'],
                          '2018-03-19T18:17:00Z')
@@ -225,24 +180,40 @@ class TestFetchFacebookPostsData(TestCase):
         self.assertIn('400 Client Error', error_message)
         self.assertIn('Invalid OAuth access token', error_message)
 
-FACEBOOK_REACTIONS_DATA = {
-
-}
-
-
 
 class TestCanFetchPostStats(TestCase):
 
-    def test_can_get_reaction_count():
+    def test_can_get_reaction_count_from_original_api_call(self):
         with requests_mock.Mocker() as m:
             reactions_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
             m.register_uri(
                 'GET', reactions_url, status_code=200, content=json.dumps(
-                    FACEBOOK_REACTIONS_DATA).encode('utf-8'))
+                    FACEBOOK_POSTS_ONE_RECORD_RAW_DATA).encode('utf-8'))
 
             response = fetch_node_feed('account_id', access_token='AAA')
 
-            self.assertEqual(FACEBOOK_POSTS_ONE_RECORD_DATA, response)
+            reaction_labels = [
+                'none_count', 'sad_count', 'like_count', 'love_count',
+                'pride_count', 'total_reaction_count', 'haha_count', 'wow_count',
+                'thankful_count', 'angry_count'
+            ]
+            for r in reaction_labels:
+                self.assertTrue(response['data'][0][r])
+
+    def test_can_get_clean_reaction_count(self):
+        reaction_labels = [
+            'none_count', 'sad_count', 'like_count', 'love_count',
+            'pride_count', 'total_reaction_count', 'haha_count', 'wow_count',
+            'thankful_count', 'angry_count'
+        ]
+        reactions_data = {}
+        for reaction in reaction_labels:
+            reactions_data[reaction] = SAMPLE_COUNT
+
+        cleaned_data = clean_reactions_data(reactions_data)
+
+        # And our resulting data is flat
+        self.assertEqual(cleaned_data['none_count'], 566)
 
 
 class TestStateAndPagination(TestCase):
@@ -253,7 +224,7 @@ class TestStateAndPagination(TestCase):
             with requests_mock.Mocker() as m:
                 request_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
                 m.register_uri('GET', request_url, status_code=200, content=json.dumps(
-                    FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
+                    FACEBOOK_POSTS_ONE_RECORD_RAW_DATA).encode('utf-8'))
                 fetch_posts(node_id='account_id', access_token='AAA')
 
         out_dicts = sysoutput_to_dicts(out)
@@ -266,23 +237,24 @@ class TestStateAndPagination(TestCase):
         with requests_mock.Mocker() as m:
             # Our first request URL points at second_request_uri
             self.assertEqual(
-                FACEBOOK_POSTS_ONE_RECORD_DATA['paging']['cursors']['after'],
+                FACEBOOK_POSTS_ONE_RECORD_RAW_DATA['paging']['cursors']['after'],
                 'after_cursor_ZZZ')
             first_request_url = (BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
                                  '&after=after_cursor_YYY')
             m.register_uri(
                 'GET', first_request_url, status_code=200, content=json.dumps(
-                    FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
+                    FACEBOOK_POSTS_ONE_RECORD_RAW_DATA).encode('utf-8'))
 
             second_request_url = (BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
                                   '&after=after_cursor_ZZZ')
             # Our second_request_uri does not have an after cursor marker
             m.register_uri(
                 'GET', second_request_url, status_code=200, content=json.dumps(
-                    FACEBOOK_LAST_PAGE_RECORD_DATA).encode('utf-8'))
+                    FACEBOOK_LAST_PAGE_RECORD_RAW_DATA).encode('utf-8'))
             with self.assertRaises(KeyError):
-                FACEBOOK_LAST_PAGE_RECORD_DATA['paging']['cursors']['after']
+                FACEBOOK_LAST_PAGE_RECORD_RAW_DATA['paging']['cursors']['after']
 
+            # Fetch posts, with a cursor that points at our first URL
             with redirect_stdout(out):
                 fetch_posts(node_id='account_id', access_token='AAA',
                             after_state_marker='after_cursor_YYY')
@@ -294,12 +266,12 @@ class TestStateAndPagination(TestCase):
             state_record = [x for x in out_dicts if x['type'] == 'STATE'][0]
             # It fetched both of our messages
             self.assertIn(
-                FACEBOOK_LAST_PAGE_RECORD_DATA['data'][0]['message'],
+                FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA['data'][0]['message'],
                 row_messages)
             self.assertIn(
-                FACEBOOK_POSTS_ONE_RECORD_DATA['data'][0]['message'],
+                FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0]['message'],
                 row_messages)
             # And recorded the state of the first call
             self.assertEqual(
                 state_record['value']['after'],
-                FACEBOOK_POSTS_ONE_RECORD_DATA['paging']['cursors']['after'])
+                FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['paging']['cursors']['after'])

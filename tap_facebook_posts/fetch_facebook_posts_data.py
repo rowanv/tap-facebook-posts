@@ -8,6 +8,20 @@ import singer
 
 MAX_REQUEST_ITERATIONS = 50
 BASE_FACEBOOK_GRAPH_API_URL = 'https://graph.facebook.com/v2.11/'
+REACTIONS_URL = (
+    '/posts?fields=created_time,story,message,shares,'
+    'reactions.limit(0).summary(1).as(total_reaction_count),'
+    'reactions.type(NONE).limit(0).summary(1).as(none_count),'
+    'reactions.type(LIKE).limit(0).summary(1).as(like_count),'
+    'reactions.type(LOVE).limit(0).summary(1).as(love_count),'
+    'reactions.type(HAHA).limit(0).summary(1).as(haha_count),'
+    'reactions.type(WOW).limit(0).summary(1).as(wow_count),'
+    'reactions.type(SAD).limit(0).summary(1).as(sad_count),'
+    'reactions.type(ANGRY).limit(0).summary(1).as(angry_count),'
+    'reactions.type(THANKFUL).limit(0).summary(1).as(thankful_count),'
+    'reactions.type(PRIDE).limit(0).summary(1).as(pride_count)'
+    '&limit=100&access_token='
+)
 
 
 def get_abs_path(path):
@@ -36,21 +50,6 @@ def fetch_node_feed(node_id, access_token, *, after_state_marker=None):
     access_token: str, access token to Facebook Graph API
     after_state_marker: If provided, will only fetch posts after that marker.
     """
-    # New base URL
-    REACTIONS_URL = (
-        '/posts?fields=created_time,story,message,shares,'
-        'reactions.limit(0).summary(1).as(total_reaction_count),'
-        'reactions.type(NONE).limit(0).summary(1).as(none_count),'
-        'reactions.type(LIKE).limit(0).summary(1).as(like_count),'
-        'reactions.type(LOVE).limit(0).summary(1).as(love_count),'
-        'reactions.type(HAHA).limit(0).summary(1).as(haha_count),'
-        'reactions.type(WOW).limit(0).summary(1).as(wow_count),'
-        'reactions.type(SAD).limit(0).summary(1).as(sad_count),'
-        'reactions.type(ANGRY).limit(0).summary(1).as(angry_count),'
-        'reactions.type(THANKFUL).limit(0).summary(1).as(thankful_count),'
-        'reactions.type(PRIDE).limit(0).summary(1).as(pride_count)'
-        '&limit=100&access_token='
-    )
     base_url = (BASE_FACEBOOK_GRAPH_API_URL + str(node_id) +
                 REACTIONS_URL + access_token)
     if not after_state_marker:
@@ -59,15 +58,37 @@ def fetch_node_feed(node_id, access_token, *, after_state_marker=None):
         url = base_url + '&after=' + after_state_marker
     response = requests.get(url)
     if response.status_code == 200:
+        #len(response.json()['data'])
+        #return response.json()
         return json.loads(response.content.decode('utf-8'))
     else:
         error_message = str(response.status_code) + ' Client Error: ' + response.content.decode('utf-8')
         raise requests.exceptions.HTTPError(error_message)
 
 
+def clean_reactions_data(record):
+    # Flatten the reactions data
+    reactions = [
+        'none_count', 'sad_count', 'like_count', 'love_count',
+        'pride_count', 'total_reaction_count', 'haha_count', 'wow_count',
+        'thankful_count', 'angry_count'
+    ]
+    for key, value in record.items():
+        if key in reactions:
+            try:
+                record[key] = record[key]['summary']['total_count']
+            except TypeError:
+                pass
+    return record
+
 def write_records(data):
     for record in data:
         record['created_time'] = format_datetime_string(record['created_time'])
+        record = clean_reactions_data(record)
+        try:
+            record['shares'] = record['shares']['count']
+        except TypeError:
+            pass
         singer.write_record('facebook_posts', record)
 
 def fetch_posts(node_id, access_token, after_state_marker=None):
