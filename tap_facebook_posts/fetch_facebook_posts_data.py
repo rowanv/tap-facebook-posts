@@ -7,6 +7,7 @@ import singer
 
 
 MAX_REQUEST_ITERATIONS = 50
+BASE_FACEBOOK_GRAPH_API_URL = 'https://graph.facebook.com/v2.11/'
 
 
 def get_abs_path(path):
@@ -35,9 +36,23 @@ def fetch_node_feed(node_id, access_token, *, after_state_marker=None):
     access_token: str, access token to Facebook Graph API
     after_state_marker: If provided, will only fetch posts after that marker.
     """
-    BASE_FACEBOOK_GRAPH_API_URL = 'https://graph.facebook.com/v2.11/'
+    # New base URL
+    REACTIONS_URL = (
+        '/posts?fields=created_time,story,message,shares,'
+        'reactions.limit(0).summary(1).as(total_reaction_count),'
+        'reactions.type(NONE).limit(0).summary(1).as(none_count),'
+        'reactions.type(LIKE).limit(0).summary(1).as(like_count),'
+        'reactions.type(LOVE).limit(0).summary(1).as(love_count),'
+        'reactions.type(HAHA).limit(0).summary(1).as(haha_count),'
+        'reactions.type(WOW).limit(0).summary(1).as(wow_count),'
+        'reactions.type(SAD).limit(0).summary(1).as(sad_count),'
+        'reactions.type(ANGRY).limit(0).summary(1).as(angry_count),'
+        'reactions.type(THANKFUL).limit(0).summary(1).as(thankful_count),'
+        'reactions.type(PRIDE).limit(0).summary(1).as(pride_count)'
+        '&limit=100&access_token='
+    )
     base_url = (BASE_FACEBOOK_GRAPH_API_URL + str(node_id) +
-                '/feed?limit=100&access_token=' + access_token)
+                REACTIONS_URL + access_token)
     if not after_state_marker:
         url = base_url
     else:

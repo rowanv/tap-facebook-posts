@@ -57,6 +57,20 @@ AUTH_TOKEN_INVALID_DATA = {
 
 
 BASE_FB_URL = 'https://graph.facebook.com/v2.11/'
+REACTIONS_URL = (
+        '/posts?fields=created_time,story,message,shares,'
+        'reactions.limit(0).summary(1).as(total_reaction_count),'
+        'reactions.type(NONE).limit(0).summary(1).as(none_count),'
+        'reactions.type(LIKE).limit(0).summary(1).as(like_count),'
+        'reactions.type(LOVE).limit(0).summary(1).as(love_count),'
+        'reactions.type(HAHA).limit(0).summary(1).as(haha_count),'
+        'reactions.type(WOW).limit(0).summary(1).as(wow_count),'
+        'reactions.type(SAD).limit(0).summary(1).as(sad_count),'
+        'reactions.type(ANGRY).limit(0).summary(1).as(angry_count),'
+        'reactions.type(THANKFUL).limit(0).summary(1).as(thankful_count),'
+        'reactions.type(PRIDE).limit(0).summary(1).as(pride_count)'
+        '&limit=100&access_token='
+    )
 
 
 def read_access_token():
@@ -86,7 +100,7 @@ class TestFetchFacebookPostsData(TestCase):
 
     def test_raise_error_for_non_200_response(self):
         with requests_mock.Mocker() as m:
-            request_url = BASE_FB_URL + 'account_id/feed?access_token=AAA'
+            request_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
             m.register_uri(
                 'GET',
                 request_url,
@@ -102,7 +116,7 @@ class TestFetchFacebookPostsData(TestCase):
 
     def test_dont_raise_error_for_200_response(self):
         with requests_mock.Mocker() as m:
-            request_url = BASE_FB_URL + 'account_id/feed?access_token=AAA'
+            request_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
             m.register_uri(
                 'GET', request_url, status_code=200, content=json.dumps(
                     FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
@@ -114,7 +128,7 @@ class TestFetchFacebookPostsData(TestCase):
         out = io.StringIO()
         with redirect_stdout(out):
             with requests_mock.Mocker() as m:
-                request_url = BASE_FB_URL + 'account_id/feed?access_token=AAA'
+                request_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
                 m.register_uri(
                     'GET', request_url, status_code=200, content=json.dumps(
                         FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
@@ -128,7 +142,7 @@ class TestFetchFacebookPostsData(TestCase):
     def test_can_write_one_record(self):
         out = io.StringIO()
         with requests_mock.Mocker() as m:
-            request_url = BASE_FB_URL + 'officialstackoverflow/feed?access_token=AAA'
+            request_url = BASE_FB_URL + 'officialstackoverflow' + REACTIONS_URL + 'AAA'
             m.register_uri('GET', request_url, status_code=200, content=json.dumps(
                 FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
 
@@ -147,8 +161,7 @@ class TestFetchFacebookPostsData(TestCase):
     def test_can_write_multiple_records(self):
         out = io.StringIO()
         with requests_mock.Mocker() as m:
-            request_url = ('https://graph.facebook.com/v2.11/'
-                           'officialstackoverflow/feed?access_token=AAA')
+            request_url = BASE_FB_URL + 'officialstackoverflow' + REACTIONS_URL + 'AAA'
             m.register_uri('GET', request_url, status_code=200, content=json.dumps(
                            FACEBOOK_POSTS_MULT_RECORD_DATA).encode('utf-8'))
 
@@ -170,8 +183,7 @@ class TestFetchFacebookPostsData(TestCase):
     def test_records_have_singer_format_string_times(self):
         out = io.StringIO()
         with requests_mock.Mocker() as m:
-            request_url = (BASE_FB_URL +
-                           'officialstackoverflow/feed?access_token=AAA')
+            request_url = BASE_FB_URL + 'officialstackoverflow' + REACTIONS_URL + 'AAA'
             m.register_uri('GET', request_url, status_code=200, content=json.dumps(
                 FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
 
@@ -213,6 +225,25 @@ class TestFetchFacebookPostsData(TestCase):
         self.assertIn('400 Client Error', error_message)
         self.assertIn('Invalid OAuth access token', error_message)
 
+FACEBOOK_REACTIONS_DATA = {
+
+}
+
+
+
+class TestCanFetchPostStats(TestCase):
+
+    def test_can_get_reaction_count():
+        with requests_mock.Mocker() as m:
+            reactions_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
+            m.register_uri(
+                'GET', reactions_url, status_code=200, content=json.dumps(
+                    FACEBOOK_REACTIONS_DATA).encode('utf-8'))
+
+            response = fetch_node_feed('account_id', access_token='AAA')
+
+            self.assertEqual(FACEBOOK_POSTS_ONE_RECORD_DATA, response)
+
 
 class TestStateAndPagination(TestCase):
 
@@ -220,7 +251,7 @@ class TestStateAndPagination(TestCase):
         out = io.StringIO()
         with redirect_stdout(out):
             with requests_mock.Mocker() as m:
-                request_url = BASE_FB_URL + 'account_id/feed?access_token=AAA'
+                request_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
                 m.register_uri('GET', request_url, status_code=200, content=json.dumps(
                     FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
                 fetch_posts(node_id='account_id', access_token='AAA')
@@ -237,15 +268,13 @@ class TestStateAndPagination(TestCase):
             self.assertEqual(
                 FACEBOOK_POSTS_ONE_RECORD_DATA['paging']['cursors']['after'],
                 'after_cursor_ZZZ')
-            first_request_url = (BASE_FB_URL +
-                                 'account_id/feed?limit=100&access_token=AAA'
+            first_request_url = (BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
                                  '&after=after_cursor_YYY')
             m.register_uri(
                 'GET', first_request_url, status_code=200, content=json.dumps(
                     FACEBOOK_POSTS_ONE_RECORD_DATA).encode('utf-8'))
 
-            second_request_url = (BASE_FB_URL +
-                                  'account_id/feed?limit=100&access_token=AAA'
+            second_request_url = (BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
                                   '&after=after_cursor_ZZZ')
             # Our second_request_uri does not have an after cursor marker
             m.register_uri(
