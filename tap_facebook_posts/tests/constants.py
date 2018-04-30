@@ -12,6 +12,7 @@ REACTIONS_URL = (
         'reactions.type(ANGRY).limit(0).summary(1).as(angry_count),'
         'reactions.type(THANKFUL).limit(0).summary(1).as(thankful_count),'
         'reactions.type(PRIDE).limit(0).summary(1).as(pride_count)'
+        'comments.limit(0).summary(1).as(comment_count)'
         '&limit=100&access_token='
     )
 
@@ -39,7 +40,16 @@ FACEBOOK_POSTS_ONE_RECORD_DATA = {
         'id': '11239244970_10150962953494971',
         'shares': {
             'count': 52
-        }
+        },
+        "comment_count": {
+            "data": [
+            ],
+            "summary": {
+              "order": "ranked",
+              "total_count": 7,
+              "can_comment": True
+            }
+        },
     }, ],
     'paging': {
         'cursors': {'before': 'before_cursor_AAA', 'after': 'after_cursor_ZZZ'},
@@ -61,6 +71,7 @@ for reaction in REACTION_LABELS:
     FACEBOOK_POSTS_ONE_RECORD_RAW_DATA['data'][0][reaction] = SAMPLE_COUNT
     FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0][reaction] = 400
 FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0]['shares'] = 52
+FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0]['comment_count'] = 7
 
 FACEBOOK_LAST_PAGE_RECORD_DATA = {
     'data': [{
@@ -70,6 +81,15 @@ FACEBOOK_LAST_PAGE_RECORD_DATA = {
         'shares': {
             'count': 52
         },
+        "comment_count": {
+            "data": [
+            ],
+        "summary": {
+          "order": "ranked",
+          "total_count": 7,
+          "can_comment": True
+        }
+      },
     'paging': {
         'cursors': {'before': 'before_cursor_BBB'}, }
 }
@@ -79,9 +99,9 @@ FACEBOOK_LAST_PAGE_RECORD_RAW_DATA = FACEBOOK_LAST_PAGE_RECORD_DATA.copy()
 
 for reaction in REACTION_LABELS:
     FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA['data'][0][reaction] = 400
-    FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA['data'][0]['shares'] = 52
     FACEBOOK_LAST_PAGE_RECORD_RAW_DATA['data'][0][reaction] = SAMPLE_COUNT
-
+FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA['data'][0]['shares'] = 52
+FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA['data'][0]['comment_count'] = 7
 
 
 FACEBOOK_POSTS_MULT_RECORD_DATA = {
@@ -98,7 +118,16 @@ FACEBOOK_POSTS_MULT_RECORD_DATA = {
         'id': '11239244970_10150962953494111',
         'shares': {
             'count': 52
+        },
+        "comment_count": {
+            "data": [
+            ],
+        "summary": {
+          "order": "ranked",
+          "total_count": 7,
+          "can_comment": True
         }
+      },
     }],
     'paging': {
         'cursors': {'before': 'before_cursor_AAA', 'after': 'after_cursor_ZZZ'},
@@ -112,6 +141,9 @@ for reaction in REACTION_LABELS:
     FACEBOOK_POSTS_MULT_RECORD_RAW_DATA['data'][0][reaction] = SAMPLE_COUNT
     FACEBOOK_POSTS_MULT_RECORD_RAW_DATA['data'][1][reaction] = SAMPLE_COUNT
     FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0][reaction] = 400
-    FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0]['shares'] = 52
     FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1][reaction] = 400
-    FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1]['shares'] = 52
+FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0]['shares'] = 52
+FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1]['shares'] = 52
+FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0]['comment_count'] = 7
+FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1]['comment_count'] = 7
+

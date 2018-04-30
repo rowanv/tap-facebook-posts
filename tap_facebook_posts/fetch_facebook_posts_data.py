@@ -20,6 +20,7 @@ REACTIONS_URL = (
     'reactions.type(ANGRY).limit(0).summary(1).as(angry_count),'
     'reactions.type(THANKFUL).limit(0).summary(1).as(thankful_count),'
     'reactions.type(PRIDE).limit(0).summary(1).as(pride_count)'
+    'comments.limit(0).summary(1).as(comment_count)'
     '&limit=100&access_token='
 )
 
@@ -71,7 +72,7 @@ def clean_reactions_data(record):
     reactions = [
         'none_count', 'sad_count', 'like_count', 'love_count',
         'pride_count', 'total_reaction_count', 'haha_count', 'wow_count',
-        'thankful_count', 'angry_count'
+        'thankful_count', 'angry_count', 'comment_count',
     ]
     for key, value in record.items():
         if key in reactions:

@@ -214,6 +214,26 @@ class TestCanFetchPostStats(TestCase):
 
         # And our resulting data is flat
         self.assertEqual(cleaned_data['none_count'], 566)
+        self.assertEqual(cleaned_data['sad_count'], 566)
+
+
+    def test_can_get_clean_comment_count(self):
+        reactions_data = {
+            "comment_count": {
+                "data": [
+                ],
+                "summary": {
+                  "order": "ranked",
+                  "total_count": 7,
+                  "can_comment": True
+                }
+            }
+        }
+
+        cleaned_data = clean_reactions_data(reactions_data)
+
+        # And our resulting data is flat
+        self.assertEqual(cleaned_data['comment_count'], 7)
 
 
 class TestStateAndPagination(TestCase):
