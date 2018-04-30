@@ -80,7 +80,7 @@ def clean_reactions_data(record):
             try:
                 record[key] = record[key]['summary']['total_count']
             except TypeError:
-                pass
+                pass  # record is already clean
     return record
 
 
