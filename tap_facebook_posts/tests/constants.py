@@ -1,9 +1,9 @@
 
 BASE_FB_URL = 'https://graph.facebook.com/v2.11/'
 REACTIONS_URL = (
-        '/posts?fields=created_time,story,message,shares,'
+        '/posts?fields=created_time,story,message,'
         'reactions.limit(0).summary(1).as(total_reaction_count),'
-        'reactions.type(NONE).limit(0).summary(1).as(none_count),'
+        'reactions.type(NONE).limit(0).summary(1).as(none_reaction_count),'
         'reactions.type(LIKE).limit(0).summary(1).as(like_count),'
         'reactions.type(LOVE).limit(0).summary(1).as(love_count),'
         'reactions.type(HAHA).limit(0).summary(1).as(haha_count),'
@@ -11,7 +11,7 @@ REACTIONS_URL = (
         'reactions.type(SAD).limit(0).summary(1).as(sad_count),'
         'reactions.type(ANGRY).limit(0).summary(1).as(angry_count),'
         'reactions.type(THANKFUL).limit(0).summary(1).as(thankful_count),'
-        'reactions.type(PRIDE).limit(0).summary(1).as(pride_count)'
+        'reactions.type(PRIDE).limit(0).summary(1).as(pride_count),'
         'comments.limit(0).summary(1).as(comment_count)'
         '&limit=100&access_token='
     )
@@ -38,9 +38,6 @@ FACEBOOK_POSTS_ONE_RECORD_DATA = {
         'created_time': '2018-03-19T18:17:00+0000',
         'message': 'This is a test message',
         'id': '11239244970_10150962953494971',
-        'shares': {
-            'count': 52
-        },
         "comment_count": {
             "data": [
             ],
@@ -58,7 +55,7 @@ FACEBOOK_POSTS_ONE_RECORD_DATA = {
 
 # Add in the reactions
 REACTION_LABELS = [
-                'none_count', 'sad_count', 'like_count', 'love_count',
+                'none_reaction_count', 'sad_count', 'like_count', 'love_count',
                 'pride_count', 'total_reaction_count', 'haha_count', 'wow_count',
                 'thankful_count', 'angry_count'
             ]
@@ -70,7 +67,6 @@ for reaction in REACTION_LABELS:
 
     FACEBOOK_POSTS_ONE_RECORD_RAW_DATA['data'][0][reaction] = SAMPLE_COUNT
     FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0][reaction] = 400
-FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0]['shares'] = 52
 FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0]['comment_count'] = 7
 
 FACEBOOK_LAST_PAGE_RECORD_DATA = {
@@ -78,9 +74,6 @@ FACEBOOK_LAST_PAGE_RECORD_DATA = {
         'created_time': '2018-03-19T18:17:00+0000',
         'message': 'This is a the last page record message',
         'id': '11239244970_10150962953494971'}, ],
-        'shares': {
-            'count': 52
-        },
         "comment_count": {
             "data": [
             ],
@@ -100,7 +93,6 @@ FACEBOOK_LAST_PAGE_RECORD_RAW_DATA = FACEBOOK_LAST_PAGE_RECORD_DATA.copy()
 for reaction in REACTION_LABELS:
     FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA['data'][0][reaction] = 400
     FACEBOOK_LAST_PAGE_RECORD_RAW_DATA['data'][0][reaction] = SAMPLE_COUNT
-FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA['data'][0]['shares'] = 52
 FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA['data'][0]['comment_count'] = 7
 
 
@@ -109,16 +101,10 @@ FACEBOOK_POSTS_MULT_RECORD_DATA = {
         'created_time': '2018-03-19T18:17:00+0000',
         'message': 'This is a test message',
         'id': '11239244970_10150962953494971',
-        'shares': {
-            'count': 52
-        }
     }, {
         'created_time': '2018-03-19T18:17:00+0000',
         'message': 'This is a anothertest message',
         'id': '11239244970_10150962953494111',
-        'shares': {
-            'count': 52
-        },
         "comment_count": {
             "data": [
             ],
@@ -142,8 +128,6 @@ for reaction in REACTION_LABELS:
     FACEBOOK_POSTS_MULT_RECORD_RAW_DATA['data'][1][reaction] = SAMPLE_COUNT
     FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0][reaction] = 400
     FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1][reaction] = 400
-FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0]['shares'] = 52
-FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1]['shares'] = 52
 FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0]['comment_count'] = 7
 FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1]['comment_count'] = 7
 

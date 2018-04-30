@@ -9,9 +9,9 @@ import singer
 MAX_REQUEST_ITERATIONS = 50
 BASE_FACEBOOK_GRAPH_API_URL = 'https://graph.facebook.com/v2.11/'
 REACTIONS_URL = (
-    '/posts?fields=created_time,story,message,shares,'
+    '/posts?fields=created_time,story,message,'
     'reactions.limit(0).summary(1).as(total_reaction_count),'
-    'reactions.type(NONE).limit(0).summary(1).as(none_count),'
+    'reactions.type(NONE).limit(0).summary(1).as(none_reaction_count),'
     'reactions.type(LIKE).limit(0).summary(1).as(like_count),'
     'reactions.type(LOVE).limit(0).summary(1).as(love_count),'
     'reactions.type(HAHA).limit(0).summary(1).as(haha_count),'
@@ -19,7 +19,7 @@ REACTIONS_URL = (
     'reactions.type(SAD).limit(0).summary(1).as(sad_count),'
     'reactions.type(ANGRY).limit(0).summary(1).as(angry_count),'
     'reactions.type(THANKFUL).limit(0).summary(1).as(thankful_count),'
-    'reactions.type(PRIDE).limit(0).summary(1).as(pride_count)'
+    'reactions.type(PRIDE).limit(0).summary(1).as(pride_count),'
     'comments.limit(0).summary(1).as(comment_count)'
     '&limit=100&access_token='
 )
@@ -70,7 +70,7 @@ def fetch_node_feed(node_id, access_token, *, after_state_marker=None):
 def clean_reactions_data(record):
     # Flatten the reactions data
     reactions = [
-        'none_count', 'sad_count', 'like_count', 'love_count',
+        'none_reaction_count', 'sad_count', 'like_count', 'love_count',
         'pride_count', 'total_reaction_count', 'haha_count', 'wow_count',
         'thankful_count', 'angry_count', 'comment_count',
     ]
@@ -86,10 +86,6 @@ def write_records(data):
     for record in data:
         record['created_time'] = format_datetime_string(record['created_time'])
         record = clean_reactions_data(record)
-        try:
-            record['shares'] = record['shares']['count']
-        except TypeError:
-            pass
         singer.write_record('facebook_posts', record)
 
 def fetch_posts(node_id, access_token, after_state_marker=None):

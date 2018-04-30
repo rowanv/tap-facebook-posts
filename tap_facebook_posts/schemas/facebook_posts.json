@@ -9,6 +9,39 @@
 	    },
 	    "id": {
 	    	"type": "string"
+	    },
+	    "none_count": {
+	    	"type": "integer"
+	    },
+	    "sad_count": {
+	    	"type": "integer"
+	    },
+	    "like_count": {
+	    	"type": "integer"
+	    },
+	    "love_count": {
+	    	"type": "integer"
+	    },
+	    "pride_count": {
+	    	"type": "integer"
+	    },
+	    "total_reaction_count": {
+	    	"type": "integer"
+	    },
+	    "haha_count": {
+	    	"type": "integer"
+	    },
+	    "wow_count": {
+	    	"type": "integer"
+	    },
+	    "thankful_count": {
+	    	"type": "integer"
+	    },
+	    "angry_count": {
+	    	"type": "integer"
+	    },
+	    "comment_count": {
+	    	"type": "integer"
 	    }
 	}
 }

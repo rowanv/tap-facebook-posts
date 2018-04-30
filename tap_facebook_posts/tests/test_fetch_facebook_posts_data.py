@@ -193,7 +193,7 @@ class TestCanFetchPostStats(TestCase):
             response = fetch_node_feed('account_id', access_token='AAA')
 
             reaction_labels = [
-                'none_count', 'sad_count', 'like_count', 'love_count',
+                'none_reaction_count', 'sad_count', 'like_count', 'love_count',
                 'pride_count', 'total_reaction_count', 'haha_count', 'wow_count',
                 'thankful_count', 'angry_count'
             ]
@@ -202,7 +202,7 @@ class TestCanFetchPostStats(TestCase):
 
     def test_can_get_clean_reaction_count(self):
         reaction_labels = [
-            'none_count', 'sad_count', 'like_count', 'love_count',
+            'none_reaction_count', 'sad_count', 'like_count', 'love_count',
             'pride_count', 'total_reaction_count', 'haha_count', 'wow_count',
             'thankful_count', 'angry_count'
         ]
@@ -213,7 +213,7 @@ class TestCanFetchPostStats(TestCase):
         cleaned_data = clean_reactions_data(reactions_data)
 
         # And our resulting data is flat
-        self.assertEqual(cleaned_data['none_count'], 566)
+        self.assertEqual(cleaned_data['none_reaction_count'], 566)
         self.assertEqual(cleaned_data['sad_count'], 566)
 
 
