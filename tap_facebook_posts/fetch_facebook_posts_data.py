@@ -30,11 +30,12 @@ def get_abs_path(path):
 
 
 def load_schema(entity):
-    return singer.utils.load_json(get_abs_path("schemas/{}.json".format(entity)))
+    return singer.utils.load_json(get_abs_path(
+                                  "schemas/{}.json".format(entity)))
 
 
 def format_datetime_string(original_dt):
-    """Convert datetime into formatted string that is compatible with the Singer spec.
+    """Convert datetime into formatted string that is compatible w/ Singer spec.
     """
     FB_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S+%f"
     TARGET_DATETIME_PARSE = "%Y-%m-%dT%H:%M:%SZ"
@@ -45,7 +46,8 @@ def format_datetime_string(original_dt):
 def fetch_node_feed(node_id, access_token, *, after_state_marker=None):
     """Fetch the feed with all Post nodes for a given node.
 
-    For more info, see https://developers.facebook.com/docs/graph-api/using-graph-api/
+    For more info, see
+        https://developers.facebook.com/docs/graph-api/using-graph-api/
 
     node_id: str or int, unique identifier for a given node.
     access_token: str, access token to Facebook Graph API
@@ -59,11 +61,10 @@ def fetch_node_feed(node_id, access_token, *, after_state_marker=None):
         url = base_url + '&after=' + after_state_marker
     response = requests.get(url)
     if response.status_code == 200:
-        #len(response.json()['data'])
-        #return response.json()
         return json.loads(response.content.decode('utf-8'))
     else:
-        error_message = str(response.status_code) + ' Client Error: ' + response.content.decode('utf-8')
+        error_message = (str(response.status_code) + ' Client Error: ' +
+                         response.content.decode('utf-8'))
         raise requests.exceptions.HTTPError(error_message)
 
 
@@ -82,11 +83,13 @@ def clean_reactions_data(record):
                 pass
     return record
 
+
 def write_records(data):
     for record in data:
         record['created_time'] = format_datetime_string(record['created_time'])
         record = clean_reactions_data(record)
         singer.write_record('facebook_posts', record)
+
 
 def fetch_posts(node_id, access_token, after_state_marker=None):
     """Fetches all posts for a given node.

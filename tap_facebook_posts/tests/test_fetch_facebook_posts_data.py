@@ -10,7 +10,7 @@ from ..fetch_facebook_posts_data import (fetch_node_feed, fetch_posts,
                                          format_datetime_string,
                                          clean_reactions_data)
 from .constants import (
-    BASE_FB_URL, REACTIONS_URL,FACEBOOK_POSTS_ONE_RECORD_RAW_DATA,
+    BASE_FB_URL, REACTIONS_URL, FACEBOOK_POSTS_ONE_RECORD_RAW_DATA,
     FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA,
     SAMPLE_COUNT, FACEBOOK_LAST_PAGE_RECORD_RAW_DATA,
     FACEBOOK_LAST_PAGE_RECORD_CLEAN_DATA,
@@ -54,13 +54,19 @@ def sysoutput_to_dicts(out):
 class TestFetchFacebookPostsData(TestCase):
 
     def test_raise_error_for_non_200_response(self):
+        error_message = (
+            b'{"error":{"message":"Error validating access token:'
+            b' Session has expired on Saturday, 24-Mar-18 05:00:00 PDT. '
+            b'The current time is Saturday, 24-Mar-18 05:20:17 PDT.",'
+            b'"type":"OAuthException","code":190,"error_subcode":463,"'
+            b'fbtrace_id":"ACz1b5AhZtt"}}')
         with requests_mock.Mocker() as m:
             request_url = BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
             m.register_uri(
                 'GET',
                 request_url,
                 status_code=400,
-                content=b'{"error":{"message":"Error validating access token: Session has expired on Saturday, 24-Mar-18 05:00:00 PDT. The current time is Saturday, 24-Mar-18 05:20:17 PDT.","type":"OAuthException","code":190,"error_subcode":463,"fbtrace_id":"ACz1b5AhZtt"}}')
+                content=error_message)
             with self.assertRaises(requests.exceptions.HTTPError) as error_manager:
                 fetch_node_feed('account_id', access_token='AAA')
 
@@ -109,9 +115,11 @@ class TestFetchFacebookPostsData(TestCase):
         # We wrote at least 1 record
         self.assertIn('RECORD', row_types)
         # And it contains our expected data
-        self.assertTrue(equal_dicts(out_dicts[1]['record'],
-                                    FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0],
-                                    ignore_keys='created_time'))
+        self.assertTrue(
+            equal_dicts(
+                out_dicts[1]['record'],
+                FACEBOOK_POSTS_ONE_RECORD_CLEAN_DATA['data'][0],
+                ignore_keys='created_time'))
 
     def test_can_write_multiple_records(self):
         out = io.StringIO()
@@ -128,12 +136,16 @@ class TestFetchFacebookPostsData(TestCase):
         # We wrote at least 1 record
         self.assertIn('RECORD', row_types)
         # And it contains both of our expected data points
-        self.assertTrue(equal_dicts(out_dicts[1]['record'],
-                                    FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0],
-                                    ignore_keys='created_time'))
-        self.assertTrue(equal_dicts(out_dicts[2]['record'],
-                                    FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1],
-                                    ignore_keys='created_time'))
+        self.assertTrue(
+            equal_dicts(
+                out_dicts[1]['record'],
+                FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][0],
+                ignore_keys='created_time'))
+        self.assertTrue(
+            equal_dicts(
+                out_dicts[2]['record'],
+                FACEBOOK_POSTS_MULT_RECORD_CLEAN_DATA['data'][1],
+                ignore_keys='created_time'))
 
     def test_records_have_singer_format_string_times(self):
         out = io.StringIO()
@@ -193,10 +205,16 @@ class TestCanFetchPostStats(TestCase):
             response = fetch_node_feed('account_id', access_token='AAA')
 
             reaction_labels = [
-                'none_reaction_count', 'sad_count', 'like_count', 'love_count',
-                'pride_count', 'total_reaction_count', 'haha_count', 'wow_count',
-                'thankful_count', 'angry_count'
-            ]
+                'none_reaction_count',
+                'sad_count',
+                'like_count',
+                'love_count',
+                'pride_count',
+                'total_reaction_count',
+                'haha_count',
+                'wow_count',
+                'thankful_count',
+                'angry_count']
             for r in reaction_labels:
                 self.assertTrue(response['data'][0][r])
 
@@ -216,16 +234,15 @@ class TestCanFetchPostStats(TestCase):
         self.assertEqual(cleaned_data['none_reaction_count'], 566)
         self.assertEqual(cleaned_data['sad_count'], 566)
 
-
     def test_can_get_clean_comment_count(self):
         reactions_data = {
             "comment_count": {
                 "data": [
                 ],
                 "summary": {
-                  "order": "ranked",
-                  "total_count": 7,
-                  "can_comment": True
+                    "order": "ranked",
+                    "total_count": 7,
+                    "can_comment": True
                 }
             }
         }
@@ -259,14 +276,22 @@ class TestStateAndPagination(TestCase):
             self.assertEqual(
                 FACEBOOK_POSTS_ONE_RECORD_RAW_DATA['paging']['cursors']['after'],
                 'after_cursor_ZZZ')
-            first_request_url = (BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
-                                 '&after=after_cursor_YYY')
+            first_request_url = (
+                BASE_FB_URL +
+                'account_id' +
+                REACTIONS_URL +
+                'AAA'
+                '&after=after_cursor_YYY')
             m.register_uri(
                 'GET', first_request_url, status_code=200, content=json.dumps(
                     FACEBOOK_POSTS_ONE_RECORD_RAW_DATA).encode('utf-8'))
 
-            second_request_url = (BASE_FB_URL + 'account_id' + REACTIONS_URL + 'AAA'
-                                  '&after=after_cursor_ZZZ')
+            second_request_url = (
+                BASE_FB_URL +
+                'account_id' +
+                REACTIONS_URL +
+                'AAA'
+                '&after=after_cursor_ZZZ')
             # Our second_request_uri does not have an after cursor marker
             m.register_uri(
                 'GET', second_request_url, status_code=200, content=json.dumps(
